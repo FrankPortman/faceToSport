@@ -21,10 +21,8 @@ faces = face_cascade.detectMultiScale(image_grey,scaleFactor=1.16,minNeighbors=5
 
 for x,y,w,h in faces:
     sub_img=image[y-10:y+h+10,x-10:x+w+10]
-    os.chdir("Extracted")
-    cv2.imwrite(str(y)+".jpg",sub_img)
+    os.chdir("../img/Extracted")
+    cv2.imwrite(os.path.basename(image_path)+"-extracted.jpg",sub_img)
     os.chdir("../")
-    cv2.rectangle(image,(x,y),(x+w,y+h),(255, 255,0),2)
 
-cv2.imshow("Faces Found",image)
-cv2.waitKey(0)
+
