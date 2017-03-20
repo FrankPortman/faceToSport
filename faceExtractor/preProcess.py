@@ -7,16 +7,34 @@ for file in os.listdir('../imgs/Extracted/'):
     img = cv2.imread(os.path.join('../imgs/Extracted', file), 0)
     if img is not None:
         images.append(img)
+
     
+## append whitespace after finding the max size then resize
+max_x, max_y = max([i.shape for i in images])
 
-images = [cv2.resize(i, (200, 200)) for i in images]
-imagesP = [i.flatten() for i in images]
+max_x = max([i.shape[0] for i in images])
+max_y = max([i.shape[1] for i in images])
 
-all([len(i) == (200 * 200) for i in imagesP])
+scaled_images = []
 
-plt.imshow(images[0], cmap='gray')
-plt.imshow(images[84], cmap='gray')
-plt.imshow(images[1024], cmap='gray')
+for i in images:
+    top, bottom, left, right = max_x - i.shape[0], 0, int(np.floor((max_y - i.shape[1]) / 2.0)), int(np.ceil((max_y - i.shape[1]) / 2.0))
+    scaled_images.append(cv2.copyMakeBorder(i, top, bottom, left, right, cv2.BORDER_CONSTANT, (0, 0, 0, 0)))
+    
+    
+scaled_images = [cv2.resize(i, (200, 200)) for i in scaled_images]
+scaled_imagesP = [i.flatten() for i in scaled_images]
+
+all([len(i) == (200 * 200) for i in scaled_imagesP])
+
+plt.imshow(scaled_images[0], cmap='gray')
+plt.imshow(scaled_images[84], cmap='gray')
+plt.imshow(scaled_images[1024], cmap='gray')
+
+[i.shape[0] for i in images].index(max_x)
+
+plt.imshow(scaled_images[405], cmap='gray')
+
 
 kek = sum(images)
 kek = kek / len(images)
