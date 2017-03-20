@@ -19,7 +19,7 @@ scaled_images = []
 
 for i in images:
     top, bottom, left, right = max_x - i.shape[0], 0, int(np.floor((max_y - i.shape[1]) / 2.0)), int(np.ceil((max_y - i.shape[1]) / 2.0))
-    scaled_images.append(cv2.copyMakeBorder(i, top, bottom, left, right, cv2.BORDER_CONSTANT, (0, 0, 0, 0)))
+    scaled_images.append(cv2.copyMakeBorder(i, top, bottom, left, right, borderType=cv2.BORDER_CONSTANT, value=(255, 255, 255, 255)))
     
     
 scaled_images = [cv2.resize(i, (200, 200)) for i in scaled_images]
@@ -48,7 +48,7 @@ kek + kek
 
 images[0].dtype
 
-kek = [i.astype("double") for i in images]
+kek = [i.astype("double") for i in scaled_images]
 kek = sum(kek)
 kek = kek / len(images)
 
