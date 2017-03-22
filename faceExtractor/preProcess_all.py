@@ -6,9 +6,11 @@ images = []
 for file in os.listdir('../imgs/Extracted/'):
     img = cv2.imread(os.path.join('../imgs/Extracted', file), 0)
     if img is not None:
-        images.append((img, file[0:2]))
+        images.append((img, file[0:3]))
 
-    
+
+labels = [i[1] for i in images]
+images = [i[0] for i in images]
 ## append whitespace after finding the max size then resize
 max_x, max_y = max([i.shape for i in images])
 
@@ -34,7 +36,7 @@ plt.imshow(scaled_images[1024], cmap='gray')
 [i.shape[0] for i in images].index(max_x)
 
 plt.imshow(scaled_images[405], cmap='gray')
-
+plt.imshow(scaled_images[2504], cmap='gray')
 
 kek = sum(images)
 kek = kek / len(images)
@@ -53,3 +55,22 @@ kek = sum(kek)
 kek = kek / len(images)
 
 plt.imshow(kek, cmap='gray')
+
+
+### average faces
+scaled_images = [i.astype("double") for i in scaled_images]
+
+def plotAvgFace(league):
+    mat = sum([scaled_images[i] for i,x in enumerate(labels) if x == league])
+    mat = mat / len([i for i in labels if i == league])
+    plt.imshow(mat, cmap='gray')
+    
+
+nhl = sum([scaled_images[i] for i,x in enumerate(labels) if x == 'nhl'])
+nhl = nhl / len([i for i in labels if i == 'nhl'])
+
+plt.imshow(nhl, cmap='gray')
+
+plotAvgFace("nhl")
+plotAvgFace("nfl")
+plotAvgFace("nba")
