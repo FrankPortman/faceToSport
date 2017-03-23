@@ -74,3 +74,147 @@ plt.imshow(nhl, cmap='gray')
 plotAvgFace("nhl")
 plotAvgFace("nfl")
 plotAvgFace("nba")
+
+## basic keras model 
+import keras
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import RMSprop
+import pandas
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.wrappers.scikit_learn import KerasClassifier
+from keras.utils import np_utils
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import LabelEncoder
+from sklearn.pipeline import Pipeline
+
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+x_train = x_train.reshape(60000, 784)
+x_test = x_test.reshape(10000, 784)
+x_train = x_train.astype('float32')
+x_test = x_test.astype('float32')
+x_train /= 255
+x_test /= 255
+
+train = np.vstack(scaled_imagesP)
+encoder = LabelEncoder()
+encoder.fit(labels)
+encoded_lab = encoder.transform(labels)
+
+labs = keras.utils.np_utils.to_categorical(encoded_lab, 3)
+
+train = train.astype("float32")
+train /= 255
+
+model = Sequential()
+model.add(Dense(1200, activation='relu', input_shape=(40000, )))
+model.add(Dropout(0.02))
+model.add(Dense(2400, activation='tanh'))
+model.add(Dropout(0.02))
+model.add(Dense(2400, activation='sigmoid'))
+model.add(Dropout(0.02))
+model.add(Dense(2400, activation='relu'))
+model.add(Dropout(0.02))
+model.add(Dense(512, activation='tanh'))
+model.add(Dropout(0.02))
+model.add(Dense(2400, activation='tanh'))
+model.add(Dropout(0.02))
+model.add(Dense(2400, activation='sigmoid'))
+model.add(Dropout(0.02))
+model.add(Dense(2400, activation='relu'))
+model.add(Dropout(0.02))
+model.add(Dense(512, activation='tanh'))
+model.add(Dropout(0.02))
+model.add(Dense(3, activation='softmax'))
+
+model.summary()
+
+model.compile(loss='categorical_crossentropy',
+              optimizer=RMSprop(),
+              metrics=['accuracy'])
+
+
+history = model.fit(train, labs, batch_size=10, nb_epoch=10, verbose=1, class_weight='auto')
+
+out = model.predict(train)
+
+out = [i.tolist().index(max(i)) for i in out]
+
+np.mean(out)
+
+from keras.datasets import cifar10
+
+(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+
+X_train.shape
+
+scaled_images = []
+
+for i in images:
+    top, bottom, left, right = max_x - i.shape[0], 0, int(np.floor((max_y - i.shape[1]) / 2.0)), int(np.ceil((max_y - i.shape[1]) / 2.0))
+    scaled_images.append(cv2.copyMakeBorder(i, top, bottom, left, right, borderType=cv2.BORDER_CONSTANT, value=(255, 255, 255, 255)))
+    
+    
+scaled_images = [cv2.resize(i, (28, 28)) for i in scaled_images]
+
+images_array = np.dstack(scaled_images)
+images_array = np.rollaxis(images_array, -1)
+
+images_array.shape
+
+plt.imshow(images_array[0], cmap='gray')
+
+
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+# Simple CNN model for CIFAR-10
+import numpy
+from keras.datasets import cifar10
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.layers import Flatten
+from keras.constraints import maxnorm
+from keras.optimizers import SGD
+from keras.layers.convolutional import Convolution2D
+from keras.layers.convolutional import MaxPooling2D
+from keras.utils import np_utils
+from keras import backend as K
+
+images_array = np.expand_dims(images_array, 4)
+
+model = Sequential()
+model.add(Convolution2D(28, 3, 3, input_shape=(28, 28, 1), border_mode='same', activation='relu', W_constraint=maxnorm(3)))
+model.add(Dropout(0.1))
+model.add(Convolution2D(28, 3, 3, activation='relu', border_mode='same', W_constraint=maxnorm(3)))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Flatten())
+model.add(Dense(512, activation='relu', W_constraint=maxnorm(3)))
+model.add(Dropout(0.1))
+model.add(Dense(3, activation='softmax'))
+# Compile model
+epochs = 25
+lrate = 0.01
+decay = lrate/epochs
+sgd = SGD(lr=lrate, momentum=0.9, decay=decay, nesterov=False)
+model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+print(model.summary())
+
+history = model.fit(images_array, labs, batch_size=10, nb_epoch=100, verbose=1, class_weight='auto')
+
+out = model.predict(images_array)
+
+out
