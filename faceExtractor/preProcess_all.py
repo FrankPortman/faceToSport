@@ -1,5 +1,8 @@
 import cv2
-from matplotlib import pyplot as plt 
+from matplotlib import pyplot as plt
+import numpy as np
+import matplotlib # matplotlib.pyplot.show('hold')
+import os
 
 images = []
 
@@ -159,6 +162,7 @@ for i in images:
     
     
 scaled_images = [cv2.resize(i, (28, 28)) for i in scaled_images]
+scaled_images = [cv2.resize(i, (28, 28)) for i in images]
 
 images_array = np.dstack(scaled_images)
 images_array = np.rollaxis(images_array, -1)
@@ -168,18 +172,6 @@ images_array.shape
 plt.imshow(images_array[0], cmap='gray')
 
 
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
 # Simple CNN model for CIFAR-10
 import numpy
 from keras.datasets import cifar10
@@ -197,12 +189,20 @@ from keras import backend as K
 images_array = np.expand_dims(images_array, 4)
 
 model = Sequential()
-model.add(Convolution2D(28, 3, 3, input_shape=(28, 28, 1), border_mode='same', activation='relu', W_constraint=maxnorm(3)))
+model.add(Convolution2D(12, 2, 2, input_shape=(28, 28, 1), activation='relu'))
 model.add(Dropout(0.1))
-model.add(Convolution2D(28, 3, 3, activation='relu', border_mode='same', W_constraint=maxnorm(3)))
+model.add(Convolution2D(12, 2, 2, activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Convolution2D(20, 3, 3, activation='relu'))
+model.add(Convolution2D(20, 3, 3, activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.1))
+model.add(Convolution2D(12, 2, 2, activation='relu'))
+model.add(Convolution2D(20, 2, 2, activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Dropout(0.5))
 model.add(Flatten())
-model.add(Dense(512, activation='relu', W_constraint=maxnorm(3)))
+model.add(Dense(128, activation='relu', W_constraint=maxnorm(3)))
 model.add(Dropout(0.1))
 model.add(Dense(3, activation='softmax'))
 # Compile model
@@ -210,11 +210,68 @@ epochs = 25
 lrate = 0.01
 decay = lrate/epochs
 sgd = SGD(lr=lrate, momentum=0.9, decay=decay, nesterov=False)
-model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adadelta(), metrics=['accuracy'])
 print(model.summary())
 
-history = model.fit(images_array, labs, batch_size=10, nb_epoch=100, verbose=1, class_weight='auto')
+history = model.fit(images_array, labs, batch_size=20, nb_epoch=1000, verbose=1, class_weight='auto')
 
 out = model.predict(images_array)
 
 out
+
+out2 = [i.tolist().index(max(i)) for i in out]
+
+np.mean(out2)
+
+from sklearn.metrics import log_loss
+
+log_loss(labs, out)
+
+losses = [-(sum(np.log(x) * y)) for x,y in zip(out, labs)]
+losses.index(max(losses))
+
+plt.imshow(scaled_images[2511], cmap='gray')  
+
+out[2511]
+labs[2511]
+labels[2511]
+
+worst_to_best = np.flipud(np.argsort(losses))
+worst_to_best.tolist().index(2511)
+
+plt.imshow(scaled_images[worst_to_best[0]], cmap='gray')
+out[worst_to_best[0]]
+labs[worst_to_best[0]]
+labels[worst_to_best[0]]
+
+plt.imshow(scaled_images[worst_to_best[-1]], cmap='gray')
+out[worst_to_best[-1]]
+labs[worst_to_best[-1]]
+labels[worst_to_best[-1]]
+
+plt.imshow(scaled_images[worst_to_best[14]], cmap='gray')
+out[worst_to_best[14]]
+labs[worst_to_best[14]]
+labels[worst_to_best[14]]
+
+def plotFace(idx):
+    plt.imshow(scaled_images[worst_to_best[idx]], cmap='gray')
+    print 'predictions are', out[worst_to_best[idx]]
+    print 'labels are', labs[worst_to_best[idx]]
+    print 'sport is', labels[worst_to_best[idx]]
+    
+
+plotFace(13)
+plotFace(14)
+plotFace(15)    
+plotFace(16)
+plotFace(17)
+plotFace(18)
+plotFace(19)
+plotFace(1600)
+plotFace(2000)
+
+accuracies = history.history.get('acc')
+epochs = history.epoch
+
+plt.plot(epochs, accuracies)
